@@ -1,11 +1,3 @@
-
-'''
-TODO:
-    1. Modify so that if provide ticker is not in ticker_timestamp_dict, a default start stamp
-       of X days is used (maybe a year)?
-    
-'''
-
 import argparse
 import os
 import sys
@@ -22,81 +14,23 @@ from ta import add_all_ta_features
 from colorama import Fore, Style, Back
 
 # Ticker Timestamp Dictionary
-stock_ts = int(time.time()) - (365 * 10 * 24 * 60 * 60) # last 10 years
-cryto_ts = int(time.time()) - (365 * 5 * 24 * 60 * 60) # last 5 years
-nf_ticker = int(time.time()) - (365 * 24 * 60 * 60) # default ticker (last 365 days) for symbols not in ticker_timestamp_dict
+stock_ts = int(time.time()) - (365 * 10 * 24 * 60 * 60)  # Last 10 years
+crypto_ts = int(time.time()) - (365 * 5 * 24 * 60 * 60)  # Last 5 years
+default_ts = int(time.time()) - (365 * 24 * 60 * 60)  # Default: Last 365 days for symbols not in ticker_timestamp_dict
 
 ticker_timestamp_dict = {
-    "AAPL": stock_ts,  # Apple
-    "MSFT": stock_ts,  # Microsoft
-    "AMZN": stock_ts,  # Amazon
-    "GOOGL": stock_ts,  # Google
-    "TSLA": stock_ts,  # Tesla
-    "FB": stock_ts,  # Facebook
-    "GOOG": stock_ts,  # Alphabet Inc.
-    "BRK.B": stock_ts,  # Berkshire Hathaway
-    "JPM": stock_ts,  # JPMorgan Chase
-    "JNJ": stock_ts,  # Johnson & Johnson
-    "V": stock_ts,  # Visa Inc.
-    "PG": stock_ts,  # Procter & Gamble
-    "UNH": stock_ts,  # UnitedHealth Group
-    "MA": stock_ts,  # Mastercard
-    "HD": stock_ts,  # Home Depot
-    "DIS": stock_ts,  # The Walt Disney Company
-    "PYPL": stock_ts,  # PayPal Holdings
-    "BAC": stock_ts,  # Bank of America
-    "INTC": stock_ts,  # Intel Corporation
-    "CMCSA": stock_ts,  # Comcast
-    "VZ": stock_ts,  # Verizon Communications
-    "ADBE": stock_ts,  # Adobe Inc.
-    "T": stock_ts,  # AT&T Inc.
-    "NFLX": stock_ts,  # Netflix
-    "NKE": stock_ts,  # Nike, Inc.
-    "NVDA": stock_ts,  # NVIDIA
-    "CRM": stock_ts,  # Salesforce.com
-    "XOM": stock_ts,  # ExxonMobil
-    "CSCO": stock_ts,  # Cisco Systems
-    "KO": stock_ts,  # The Coca-Cola Company
-    "ORCL": stock_ts,  # Oracle Corporation
-    "WMT": stock_ts,  # Walmart
-    "IBM": stock_ts,  # IBM
-    "PEP": stock_ts,  # PepsiCo
-    "ABBV": stock_ts,  # AbbVie Inc.
-    "TMO": stock_ts,  # Thermo Fisher Scientific
-    "ABBV": stock_ts,  # AbbVie Inc.
-    "TMO": stock_ts,  # Thermo Fisher Scientific
-    "MO": stock_ts,  # Altria Group
-    "COST": stock_ts,  # Costco Wholesale
-    "MRK": stock_ts,  # Merck & Co.
-    "BA": stock_ts,  # Boeing
-    "LLY": stock_ts,  # Eli Lilly and Company
-    "MDT": stock_ts,  # Medtronic
-    "ABT": stock_ts,  # Abbott Laboratories
-    "MMM": stock_ts,  # 3M
-    "PM": stock_ts,  # Philip Morris International
-    "GOOGL": stock_ts,  # Google
-    "F": stock_ts,  # Ford
-    "NVDA": stock_ts,  # NVIDIA
-    "DOGE": cryto_ts,  # Dogecoin
-    "BTC": cryto_ts,  # Bitcoin
-    "ETH": cryto_ts,  # Ethereum
-    "XRP": cryto_ts,  # Ripple
-    "LTC": cryto_ts,  # Litecoin
-    "ADA": cryto_ts,  # Cardano
-    "SOL": cryto_ts,  # Solana
-    "DOT": cryto_ts,  # Polkadot
-    "USDC": cryto_ts,  # USD Coin
-    "DOGE": cryto_ts,  # Dogecoin
-    "SHIB": cryto_ts,  # Shiba Inu
-    "LINK": cryto_ts,  # Chainlink
-    "MATIC": cryto_ts,  # Polygon
-    "XLM": cryto_ts,  # Stellar
-    "ATOM": cryto_ts,  # Cosmos
-    "ETC": cryto_ts,  # Ethereum Classic
-    "VET": cryto_ts,  # VeChain
-    "FIL": cryto_ts,  # Filecoin
-    "TRX": cryto_ts,  # TRON
-    "UNI": cryto_ts,  # Uniswap
+    "AAPL": stock_ts, "MSFT": stock_ts, "AMZN": stock_ts, "GOOGL": stock_ts, "TSLA": stock_ts, "FB": stock_ts,
+    "GOOG": stock_ts, "BRK.B": stock_ts, "JPM": stock_ts, "JNJ": stock_ts, "V": stock_ts, "PG": stock_ts,
+    "UNH": stock_ts, "MA": stock_ts, "HD": stock_ts, "DIS": stock_ts, "PYPL": stock_ts, "BAC": stock_ts,
+    "INTC": stock_ts, "CMCSA": stock_ts, "VZ": stock_ts, "ADBE": stock_ts, "T": stock_ts, "NFLX": stock_ts,
+    "NKE": stock_ts, "NVDA": stock_ts, "CRM": stock_ts, "XOM": stock_ts, "CSCO": stock_ts, "KO": stock_ts,
+    "ORCL": stock_ts, "WMT": stock_ts, "IBM": stock_ts, "PEP": stock_ts, "ABBV": stock_ts, "TMO": stock_ts,
+    "MO": stock_ts, "COST": stock_ts, "MRK": stock_ts, "BA": stock_ts, "LLY": stock_ts, "MDT": stock_ts,
+    "ABT": stock_ts, "MMM": stock_ts, "PM": stock_ts, "F": stock_ts, "NVDA": stock_ts, "DOGE": crypto_ts,
+    "BTC": crypto_ts, "ETH": crypto_ts, "XRP": crypto_ts, "LTC": crypto_ts, "ADA": crypto_ts, "SOL": crypto_ts,
+    "DOT": crypto_ts, "USDC": crypto_ts, "DOGE": crypto_ts, "SHIB": crypto_ts, "LINK": crypto_ts,
+    "MATIC": crypto_ts, "XLM": crypto_ts, "ATOM": crypto_ts, "ETC": crypto_ts, "VET": crypto_ts, "FIL": crypto_ts,
+    "TRX": crypto_ts, "UNI": crypto_ts
 }
 
 
@@ -120,9 +54,11 @@ def predict_next_day(model_high, model_low, last_day_data):
     next_day_low = model_low.predict(last_day_data)
     return next_day_high, next_day_low
 
+
 def read_stock_data(file_name):
     df = pd.read_csv(file_name)
     return df
+
 
 def preprocess_data(df):
     # Add technical indicators
@@ -132,18 +68,20 @@ def preprocess_data(df):
     df.fillna(method='bfill', inplace=True)
     return df
 
+
 def train_models(X_train, y_train):
     # Random Forest Regressor
     rf_model = RandomForestRegressor(random_state=42)
     rf_model.fit(X_train, y_train)
-    
+
     # Gradient Boosting Regressor
     gb_model = GradientBoostingRegressor(random_state=42)
     param_grid = {'n_estimators': [50, 100, 150], 'learning_rate': [0.01, 0.1, 0.2]}
     gb_cv = GridSearchCV(gb_model, param_grid, cv=TimeSeriesSplit(n_splits=5))
     gb_cv.fit(X_train, y_train)
-    
+
     return rf_model, gb_cv.best_estimator_
+
 
 def evaluate_model(model, X_test, y_test):
     predictions = model.predict(X_test)
@@ -152,13 +90,12 @@ def evaluate_model(model, X_test, y_test):
     rmse = np.sqrt(mse)
     return mse, mae, rmse
 
-def get_timestamp(ticker, ticker_timestamp_dict = ticker_timestamp_dict, nf_ticker = nf_ticker):
-    if ticker in ticker_timestamp_dict:
-        return ticker_timestamp_dict[ticker]
-    else:
-        return nf_ticker
 
-def yahooFinance(args):
+def get_timestamp(ticker):
+    return ticker_timestamp_dict.get(ticker.upper(), default_ts)
+
+
+def yahoo_finance(args):
     ticker = args.ticker.upper()
     console("Pulling financial data from Yahoo Finance for: " + ticker, "info")
 
@@ -176,7 +113,6 @@ def yahooFinance(args):
         "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/94.0.4606.71 Safari/537.36",
     ]
 
-
     # URL to download file from
     url = f"https://query1.finance.yahoo.com/v7/finance/download/{ticker}?period1={start_date}&period2={end_date}&interval=1d&events=history&includeAdjustedClose=true"
 
@@ -190,11 +126,11 @@ def yahooFinance(args):
         with open(file_path, 'wb') as file:
             file.write(response.content)
         console("Financial data has been successfully downloaded: " + file_path, "success")
-        #print(f"File '{file_path}' has been successfully downloaded.")
     else:
-        console("Failed to download file. Status code: " + str(response.status_code),"fatal")
+        console("Failed to download file. Status code: " + str(response.status_code), "fatal")
         sys.exit()
     return file_path
+
 
 def main():
     warnings.filterwarnings("ignore", category=UserWarning, message="X does not have valid feature names.*")
@@ -206,43 +142,43 @@ def main():
     args = parser.parse_args()
 
     # Get financial data for the provided ticker
-    data_csv = yahooFinance(args)
-    console("Reading financial data","info")
+    data_csv = yahoo_finance(args)
+    console("Reading financial data", "info")
     stock_data = read_stock_data(data_csv)
 
     # Preprocess the data
-    console("Performing data preprocessing.","info")
+    console("Performing data preprocessing.", "info")
     processed_data = preprocess_data(stock_data)
 
     # Split the data into features and target variables
-    console("Splitting data intp features and target variables","info")
+    console("Splitting data into features and target variables", "info")
     X = processed_data[['Open', 'High', 'Low', 'Close', 'Volume']]
     y_high = processed_data['High']
     y_low = processed_data['Low']
 
     # Split the data into training and testing sets
-    console("Creating training and testing sets.","info")
-    X_train, X_test, y_train_high, y_test_high = train_test_split(X, y_high, test_size=0.2, random_state=42)
-    X_train, X_test, y_train_low, y_test_low = train_test_split(X, y_low, test_size=0.2, random_state=42)
+    console("Creating training and testing sets.", "info")
+    X_train_high, X_test_high, y_train_high, y_test_high = train_test_split(X, y_high, test_size=0.2, random_state=42)
+    X_train_low, X_test_low, y_train_low, y_test_low = train_test_split(X, y_low, test_size=0.2, random_state=42)
 
     # Train the machine learning models
-    console("Training the predicitive model.","info")
-    rf_model_high, gb_model_high = train_models(X_train, y_train_high)
-    rf_model_low, gb_model_low = train_models(X_train, y_train_low)
+    console("Training the predictive models.", "info")
+    rf_model_high, gb_model_high = train_models(X_train_high, y_train_high)
+    rf_model_low, gb_model_low = train_models(X_train_low, y_train_low)
 
     # Evaluate the models
-    console("Evaluating models.","info")
-    rf_mse_high, rf_mae_high, rf_rmse_high = evaluate_model(rf_model_high, X_test, y_test_high)
-    gb_mse_high, gb_mae_high, gb_rmse_high = evaluate_model(gb_model_high, X_test, y_test_high)
-    rf_mse_low, rf_mae_low, rf_rmse_low = evaluate_model(rf_model_low, X_test, y_test_low)
-    gb_mse_low, gb_mae_low, gb_rmse_low = evaluate_model(gb_model_low, X_test, y_test_low)
+    console("Evaluating models.", "info")
+    rf_mse_high, rf_mae_high, rf_rmse_high = evaluate_model(rf_model_high, X_test_high, y_test_high)
+    gb_mse_high, gb_mae_high, gb_rmse_high = evaluate_model(gb_model_high, X_test_high, y_test_high)
+    rf_mse_low, rf_mae_low, rf_rmse_low = evaluate_model(rf_model_low, X_test_low, y_test_low)
+    gb_mse_low, gb_mae_low, gb_rmse_low = evaluate_model(gb_model_low, X_test_low, y_test_low)
 
     # Print evaluation results
     console("Evaluation Results: High Prediction:", "header")
     print(f"Random Forest - MSE: {rf_mse_high}, MAE: {rf_mae_high}, RMSE: {rf_rmse_high}")
     print(f"Gradient Boosting - MSE: {gb_mse_high}, MAE: {gb_mae_high}, RMSE: {gb_rmse_high}")
 
-    console("Evaluation Results: Low Prediction:", "header") 
+    console("Evaluation Results: Low Prediction:", "header")
     print(f"Random Forest - MSE: {rf_mse_low}, MAE: {rf_mae_low}, RMSE: {rf_rmse_low}")
     print(f"Gradient Boosting - MSE: {gb_mse_low}, MAE: {gb_mae_low}, RMSE: {gb_rmse_low}")
 
