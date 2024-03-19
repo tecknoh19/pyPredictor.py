@@ -1,0 +1,7 @@
+argparse
+numpy
+pandas
+requests
+scikit-learn
+ta
+colorama
