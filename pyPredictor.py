@@ -41,7 +41,7 @@ def console(text, msg_type):
         'error': Fore.RED,
         'fatal': Fore.RED + Style.BRIGHT,
         'success': Fore.GREEN,
-        'header': Fore.YELLOW + Back.BLUE
+        'header': Style.BRIGHT + Fore.YELLOW + Back.BLUE
     }
 
     color = color_codes.get(msg_type.lower(), Fore.RESET)
@@ -131,6 +131,33 @@ def yahoo_finance(args):
         sys.exit()
     return file_path
 
+def predict_next_seven_days(rf_model_high, rf_model_low, gb_model_high, gb_model_low, last_day_data):
+    # Initialize lists to store predictions
+    next_seven_days_high_rf = []
+    next_seven_days_low_rf = []
+    next_seven_days_high_gb = []
+    next_seven_days_low_gb = []
+
+    # Predict for the next 7 days using Random Forest models
+    for i in range(7):
+        next_day_high_rf, next_day_low_rf = predict_next_day(rf_model_high, rf_model_low, last_day_data)
+        next_seven_days_high_rf.append(next_day_high_rf)
+        next_seven_days_low_rf.append(next_day_low_rf)
+        # Update last_day_data for the next prediction
+        last_day_data = np.append(last_day_data, [[next_day_high_rf, next_day_low_rf]], axis=0)
+
+    # Predict for the next 7 days using Gradient Boosting models
+    for i in range(7):
+        next_day_high_gb, next_day_low_gb = predict_next_day(gb_model_high, gb_model_low, last_day_data)
+        next_seven_days_high_gb.append(next_day_high_gb)
+        next_seven_days_low_gb.append(next_day_low_gb)
+        # Update last_day_data for the next prediction
+        last_day_data = np.append(last_day_data, [[next_day_high_gb, next_day_low_gb]], axis=0)
+
+    return next_seven_days_high_rf, next_seven_days_low_rf, next_seven_days_high_gb, next_seven_days_low_gb
+
+def get_median(num1, num2):
+    return (num1 + num2) / 2
 
 def main():
     warnings.filterwarnings("ignore", category=UserWarning, message="X does not have valid feature names.*")
@@ -167,18 +194,18 @@ def main():
     rf_model_low, gb_model_low = train_models(X_train_low, y_train_low)
 
     # Evaluate the models
-    console("Evaluating models.", "info")
+    console("Evaluating models.\n", "info")
     rf_mse_high, rf_mae_high, rf_rmse_high = evaluate_model(rf_model_high, X_test_high, y_test_high)
     gb_mse_high, gb_mae_high, gb_rmse_high = evaluate_model(gb_model_high, X_test_high, y_test_high)
     rf_mse_low, rf_mae_low, rf_rmse_low = evaluate_model(rf_model_low, X_test_low, y_test_low)
     gb_mse_low, gb_mae_low, gb_rmse_low = evaluate_model(gb_model_low, X_test_low, y_test_low)
 
     # Print evaluation results
-    console("Evaluation Results: High Prediction:", "header")
+    console("\nEvaluation Results: High Prediction:", "header")
     print(f"Random Forest - MSE: {rf_mse_high}, MAE: {rf_mae_high}, RMSE: {rf_rmse_high}")
     print(f"Gradient Boosting - MSE: {gb_mse_high}, MAE: {gb_mae_high}, RMSE: {gb_rmse_high}")
 
-    console("Evaluation Results: Low Prediction:", "header")
+    console("\nEvaluation Results: Low Prediction:", "header")
     print(f"Random Forest - MSE: {rf_mse_low}, MAE: {rf_mae_low}, RMSE: {rf_rmse_low}")
     print(f"Gradient Boosting - MSE: {gb_mse_low}, MAE: {gb_mae_low}, RMSE: {gb_rmse_low}")
 
@@ -187,10 +214,26 @@ def main():
     next_day_high_rf, next_day_low_rf = predict_next_day(rf_model_high, rf_model_low, last_day_data)
     next_day_high_gb, next_day_low_gb = predict_next_day(gb_model_high, gb_model_low, last_day_data)
 
+    # Get the predicition medians
+    rf = get_median(next_day_high_rf, next_day_low_rf)
+    gb = get_median(next_day_high_gb, next_day_low_gb)
+
     # Print predictions for the following day
-    console("Predictions for the following day:", "header")
-    print(f"Random Forest - High: {next_day_high_rf}, Low: {next_day_low_rf}")
-    print(f"Gradient Boosting - High: {next_day_high_gb}, Low: {next_day_low_gb}")
+    console("\nPredictions for the following day:", "header")
+    print(f"{Fore.CYAN}[::] {Fore.GREEN}Random Forest     {Fore.RESET}- {Fore.YELLOW}High: {next_day_high_rf} {Fore.MAGENTA} Low: {next_day_low_rf} {Fore.GREEN} Median: {rf}{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}[::] {Fore.GREEN}Gradient Boosting {Fore.RESET}- {Fore.YELLOW}High: {next_day_high_gb} {Fore.MAGENTA} Low: {next_day_low_gb} {Fore.GREEN} Median: {gb}{Style.RESET_ALL}")
+
+
+    #print(f"Gradient Boosting - High: {next_day_high_gb}, Low: {next_day_low_gb}")
+
+    # Predictions for the next 7 days
+    #console("Predictions for the next 7 days:", "header")
+    #next_seven_days_high_rf, next_seven_days_low_rf, next_seven_days_high_gb, next_seven_days_low_gb = predict_next_seven_days(rf_model_high, rf_model_low, gb_model_high, gb_model_low, last_day_data)
+    
+    #for i in range(7):
+    #    console(f"Day {i+1}: Random Forest - High: {next_seven_days_high_rf[i]}, Low: {next_seven_days_low_rf[i]}", "info")
+    #    console(f"Day {i+1}: Gradient Boosting - High: {next_seven_days_high_gb[i]}, Low: {next_seven_days_low_gb[i]}", "info")
+
 
 
 if __name__ == "__main__":
